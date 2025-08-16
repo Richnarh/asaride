@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { DataSource } from 'typeorm';
-import { EmployeeController } from '../controllers/EmployeeController';
-import { EmployeeService } from '../services/EmployeeService';
-import { Employee } from '../entities/Employee';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { EmployeeController } from '../controllers/EmployeeController.js';
+import { EmployeeService } from '../services/EmployeeService.js';
+import { Employee } from '../entities/Employee.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 

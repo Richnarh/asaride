@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { EmployeeService } from '../services/EmployeeService';
+import { EmployeeService } from '../services/EmployeeService.js';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { EmployeeCreateDto } from '../dto/EmployeeCreateDto';
-import { EmployeeUpdateDto } from '../dto/EmployeeUpdateDto';
+import { EmployeeCreateDto } from '../dto/EmployeeCreateDto.js';
+import { EmployeeUpdateDto } from '../dto/EmployeeUpdateDto.js';
 
 export class EmployeeController {
   constructor(private employeeService: EmployeeService) {}

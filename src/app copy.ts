@@ -1,8 +1,8 @@
 import express from 'express';
 import { DataSource } from 'typeorm';
-import { setupUserRoutes } from './routes/userRoutes';
-import { setupAuthRoutes } from './routes/authRoutes';
-import { setupEmployeeRoutes } from './routes/employeeRoutes';
+import { setupUserRoutes } from './routes/userRoutes.js';
+import { setupAuthRoutes } from './routes/authRoutes.js';
+import { setupEmployeeRoutes } from './routes/employeeRoutes.js';
 
 export function createApp(dataSource: DataSource) {
   const app = express();

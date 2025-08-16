@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { User } from '../entities/User';
+import { User } from '../entities/User.js';
 
 interface UserData {
   name?: string;

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { DataSource } from 'typeorm';
-import { AuthService } from '../services/AuthService';
-import { User } from '../entities/User';
-import { AuthController } from '../controllers/AuthController';
+import { AuthService } from '../services/AuthService.js';
+import { User } from '../entities/User.js';
+import { AuthController } from '../controllers/AuthController.js';
 
 const router = Router();
 

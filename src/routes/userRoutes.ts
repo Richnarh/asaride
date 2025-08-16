@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { DataSource } from 'typeorm';
-import { UserService } from '../services/UserService';
-import { User } from '../entities/User';
-import { authenticateToken } from '../middleware/authMiddleware';
-import { UserController } from '../controllers/UserController';
+import { UserService } from '../services/UserService.js';
+import { User } from '../entities/User.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
+import { UserController } from '../controllers/UserController.js';
 
 const router = Router();
 

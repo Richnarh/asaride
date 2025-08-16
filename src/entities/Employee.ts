@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, BaseEntity, BeforeInsert, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ulid } from 'ulid';
-import { User } from './User'; // Import the User entity
+import { User } from './User.js'; // Import the User entity
 
 @Entity()
 export class Employee extends BaseEntity {
