@@ -1,4 +1,4 @@
-import { logger } from '@/utils/logger';
+import { logger } from '../utils/logger';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 

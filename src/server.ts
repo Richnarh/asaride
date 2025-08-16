@@ -1,4 +1,4 @@
-import createApp from '@/app';
+import createApp from './app';
 import { logger } from './utils/logger';
 
 const startEngine = async () => {
