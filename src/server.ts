@@ -2,7 +2,6 @@ import express from 'express';
 import { DataSource } from 'typeorm';
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import helmet from 'helmet';
 
 import { setupUserRoutes } from './routes/userRoutes.js';
@@ -24,7 +23,6 @@ const createApp = async (): Promise<express.Application> => {
     allowedHeaders: ['Content-Type', 'Authorization', 'UserId'],
   };
 
-  dotenv.config();
   app.use(express.json());
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: true }))
@@ -37,12 +35,13 @@ const createApp = async (): Promise<express.Application> => {
   });
 
   const routeConfigs = {
-    '/auth': () => setupAuthRoutes(dataSource),
-    '/users': () => setupUserRoutes(dataSource),
-    '/employees': () => setupEmployeeRoutes(dataSource),
+    'auth': () => setupAuthRoutes(dataSource),
+    'users': () => setupUserRoutes(dataSource),
+    'employees': () => setupEmployeeRoutes(dataSource),
   };
 
   Object.entries(routeConfigs).forEach(([path, setup]) => {
+    console.log(`${baseApi}/${path}`)
     app.use(`${baseApi}/${path}`, setup());
   });
 
