@@ -1,65 +1,89 @@
-import { Request, Response } from 'express';
-import { UserService } from '../services/UserService.js';
+import { NextFunction, Request, Response } from 'express';
+import { DataSource, Repository } from 'typeorm';
+
+import { User } from '../entities/User.js';
+import { HttpStatus } from '../utils/constants.js';
+import { Js } from '../utils/validators.js';
+import { AppError } from '../utils/errors.js';
+import { logger } from '../utils/logger.js';
 
 export class UserController {
-  constructor(private userService: UserService) {}
+  private userRepository: Repository<User>;
+  constructor(readonly dataSource: DataSource) {
+    this.userRepository = dataSource.getRepository(User);
+  }
 
-  async createUser(req: Request, res: Response) {
+  async createUser(req: Request, res: Response, next:NextFunction) {
     try {
-      const { name, email } = req.body;
-      if (!name || !email) {
-        return res.status(400).json({ message: 'Name and email are required' });
+      const { phoneNumber, emailAddress, name, id } = req.body;
+      if (!phoneNumber && !emailAddress) {
+        throw new AppError('Phone Number or Email Address is required', HttpStatus.BAD_REQUEST);
       }
-      const user = await this.userService.createUser({ name, email });
-      res.status(201).json(user);
+      let isEmail = false, isPhone = false;
+      const user = new User();
+      user.name = name;
+      if(emailAddress){
+        isEmail = Js.isValidEmail(emailAddress).isValid;
+      }
+      if(phoneNumber){
+        isPhone = Js.isValidPhone(phoneNumber).isValid;
+      }
+
+      if(isEmail){
+        user.emailAddress = emailAddress
+      }
+      if(isPhone){
+        user.phoneNumber = phoneNumber;
+      }
+      
+      const usr = await this.userRepository.save(user);
+
+      res.status(id ? HttpStatus.OK : HttpStatus.CREATED).json({ data:usr });
     } catch (error) {
-      res.status(500).json({ message: 'Error creating user', error });
+      logger.error(error);
+      next(error);
     }
   }
 
-  async getAllUsers(req: Request, res: Response) {
+  async getAllUsers(req: Request, res: Response, next:NextFunction) {
     try {
-      const users = await this.userService.getAllUsers();
-      res.json(users);
+      const users = await this.userRepository.find();
+      res.status(HttpStatus.OK).json({ data: users });
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching users', error });
+      logger.error(error);
+      next(error);
     }
   }
 
-  async getUserById(req: Request, res: Response) {
+  async getUserById(req: Request, res: Response, next:NextFunction) {
     try {
-      const user = await this.userService.getUserById(req.params.id);
+      if(!req.params.id){
+        throw new AppError('UserId is required', HttpStatus.BAD_REQUEST);
+      }
+      const user = await this.userRepository.findOneBy({ id: req.params.id});
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        throw new AppError('User not found', HttpStatus.NOT_FOUND)
       }
-      res.json(user);
+      res.status(HttpStatus.OK).json({ data:user });
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching user', error });
+      logger.error(error);
+      next(error);
     }
   }
 
-  async updateUser(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response, next:NextFunction) {
     try {
-      const { name, email } = req.body;
-      const user = await this.userService.updateUser(req.params.id, { name, email });
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      if(req.params.id){
+        throw new AppError('UserId is required', HttpStatus.BAD_REQUEST);
       }
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: 'Error updating user', error });
-    }
-  }
-
-  async deleteUser(req: Request, res: Response) {
-    try {
-      const success = await this.userService.deleteUser(req.params.id);
+      const success = await this.userRepository.delete(req.params.id);
       if (!success) {
-        return res.status(404).json({ message: 'User not found' });
+        throw new AppError('User not found', HttpStatus.NOT_FOUND);
       }
-      res.status(204).send();
+      res.status(HttpStatus.OK).json({message: 'delete successful'});
     } catch (error) {
-      res.status(500).json({ message: 'Error deleting user', error });
+      logger.error(error);
+      next(error);
     }
   }
 }

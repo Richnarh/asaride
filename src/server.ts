@@ -4,12 +4,14 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
+import swaggerUi from 'swagger-ui-express';
+
 import { setupUserRoutes } from './routes/userRoutes.js';
 import { setupAuthRoutes } from './routes/authRoutes.js';
-import { setupEmployeeRoutes } from './routes/employeeRoutes.js';
 import { initializeDatabase } from './config/dataSource.js';
 import { logger } from './utils/logger.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
+import swaggerSpec from './swagger.json' with { type: 'json' };
 
 const createApp = async (): Promise<express.Application> => {
   const dataSource: DataSource = await initializeDatabase();
@@ -17,7 +19,7 @@ const createApp = async (): Promise<express.Application> => {
   const app = express();
   const baseApi = '/api/v1'
   const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(','),
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'UserId'],
@@ -28,32 +30,31 @@ const createApp = async (): Promise<express.Application> => {
   app.use(express.urlencoded({ extended: true }))
   app.use(helmet());
   app.use(cors(corsOptions));
+  app.use(`${baseApi}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.use((req, res, next) => {
-    logger.info(`${req.method} ${req.url}`);
+    logger.info(`${req.method} ${baseApi}${req.url}`);
     next();
   });
 
   const routeConfigs = {
     'auth': () => setupAuthRoutes(dataSource),
     'users': () => setupUserRoutes(dataSource),
-    'employees': () => setupEmployeeRoutes(dataSource),
   };
 
   Object.entries(routeConfigs).forEach(([path, setup]) => {
-    console.log(`${baseApi}/${path}`)
     app.use(`${baseApi}/${path}`, setup());
   });
 
   app.use(errorMiddleware);
   return app;
 };
-
 const startEngine = async () => {
   const app = await createApp();
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
+    logger.info(`Swagger UI available at http://localhost:${PORT}/api/v1/docs`)
   });
 }
 

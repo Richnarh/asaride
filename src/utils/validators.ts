@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, Length, Matches, MinLength, registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import { IsEmail, IsNotEmpty, Length, Matches, MinLength } from 'class-validator';
 
 export class UserValidator {
   @IsEmail({}, { message: 'Invalid email format' })
@@ -8,7 +8,7 @@ export class UserValidator {
   @IsNotEmpty({ message: 'Name is required' })
   fullName?: string;
 
-  @IsNotEmpty({ message: 'Name is required' })
+  @IsNotEmpty({ message: 'Phone number is required' })
   @Matches(/^(?:(?:\+233)|0)(?:[2357]\d{8}|[23][2-9]\d{7})$/, { message: 'Invalid phone number format' })
   phoneNumber?: string;
 
@@ -31,11 +31,11 @@ export class VerifyOtpValidator {
 
 export class LoginUserValidator {
   @IsEmail({}, { message: 'Invalid email format' })
-  @IsNotEmpty({ message: 'Email is required' })
   emailAddress?: string;
 
-  @IsNotEmpty({ message: 'Password is required' })
-  password?: string;
+  @IsNotEmpty({ message: 'Phone number is required' })
+  @Matches(/^(?:(?:\+233)|0)(?:[2357]\d{8}|[23][2-9]\d{7})$/, { message: 'Invalid phone number format' })
+  phoneNumber?: string;
 }
 
 export class RefreshTokenValidator {
@@ -43,27 +43,28 @@ export class RefreshTokenValidator {
   refreshToken?: string;
 }
 
-  // @ValidatorConstraint({ async: true })
-  // export class UserAlreadyExistConstraint implements ValidatorConstraintInterface {
-  //   async validate(email: string, args: ValidationArguments) {
-  //     const user = await prisma.user.findUnique({
-  //       where: {
-  //         emailAddress: email
-  //       }
-  //     });
-  //     if (user) return false; 
-  //     return true;
-  //   }
-  // }
+export class Js {
+  private static readonly EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  private static readonly PHONE_REGEX = /^(?:(?:\+233)|0)(?:[2357]\d{8}|[23][2-9]\d{7})$/;
+  private static readonly MAX_EMAIL_LENGTH = 254; // Standard max email length (RFC 5321)
 
-  // export function userAlreadyExist(validationOptions?: ValidationOptions) {
-  //   return function (object: Object, propertyName: string) {
-  //     registerDecorator({
-  //       target: object.constructor,
-  //       propertyName: propertyName,
-  //       options: validationOptions,
-  //       constraints: [],
-  //       validator: UserAlreadyExistConstraint,
-  //     });
-  //   };
-  // }
+  static isValidPhone = (phoneNumber: string): { isValid: boolean; message?: string } => {
+    const phone = phoneNumber.trim();
+    if (!Js.PHONE_REGEX.test(phone)) {
+      return { isValid: false, message: 'Invalid phone number format' };
+    }
+    return { isValid: true };
+  }
+
+  static isValidEmail = (email: string): { isValid: boolean; message?: string } => {
+    const emailAddress = email.trim();
+    if (emailAddress.length > Js.MAX_EMAIL_LENGTH) {
+      return { isValid: false, message: 'Email length exceeds maximum limit' };
+    }
+    if (!Js.EMAIL_REGEX.test(emailAddress)) {
+      return { isValid: false, message: 'Invalid email format' };
+    }
+
+    return { isValid: true };
+  }
+}

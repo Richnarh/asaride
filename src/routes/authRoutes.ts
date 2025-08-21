@@ -1,18 +1,16 @@
 import { Router } from 'express';
 import { DataSource } from 'typeorm';
-import { AuthService } from '../services/AuthService.js';
-import { User } from '../entities/User.js';
 import { AuthController } from '../controllers/AuthController.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
+export const setupAuthRoutes = (dataSource: DataSource) => {
+  const authController = new AuthController(dataSource);
 
-export function setupAuthRoutes(dataSource: DataSource) {
-  const userRepository = dataSource.getRepository(User);
-  const authService = new AuthService(userRepository);
-  const authController = new AuthController(authService);
-
-  router.post('/register', (req, res) => authController.register(req, res));
-  router.post('/login', (req, res) => authController.login(req, res));
+  router.post('/login', authController.login.bind(authController));
+  router.post('/refresh-token/:userId', authController.refreshToken.bind(authController));
+  router.post('/verify-otp', authController.verifyOtp.bind(authController));
+  router.post('/logout/:userId', authenticateToken, authController.logoutUser.bind(authController));
 
   return router;
 }

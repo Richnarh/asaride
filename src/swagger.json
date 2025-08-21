@@ -1,0 +1,231 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Asaride User API",
+    "version": "1.0.0",
+    "description": "Asaride API for user - NodeJS - Version 1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "emailAddress": { "type": "string"},
+          "phoneNumber": { "type": "string" },
+          "imagePath": { "type": "string" },
+          "createdAt": { "type": "date", "format": "date-time" },
+          "updatedAt": { "type": "date","format": "date-time" }
+        }
+      },
+      "AuthRequest": {
+        "type": "object",
+        "properties": {
+          "emailAddress": { "type": "string"},
+          "phoneNumber": { "type": "string"}
+        },
+        "required": ["emailAddress", "phoneNumber"]
+      },
+      "Otp": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "code": { "type": "string" }
+        },
+        "required": ["userId", "code"]
+      },
+      "RefreshToken": {
+        "type": "object",
+        "properties": {
+          "refreshToken": { "type": "string" },
+          "userId": { "type": "string" }
+        },
+        "required": ["accessToken","userId"]
+      },
+      "AuthResponse":{
+        "type": "object",
+        "properties":{
+          "id":{"type": "string"},
+          "name":{"type": "string"},
+          "phoneNumber":{"type": "string"},
+          "emailAddress":{"type": "string"},
+          "accessToken":{"type": "string"},
+          "refreshToken":{"type": "string"}
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string"},
+          "message": { "type": "string"}
+        },
+        "required": ["status","message"]
+      }
+    }
+  },
+  "paths": {
+     "/api/v1/auth/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/AuthResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh-token": {
+      "post": {
+        "summary": "Refresh access token",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "refreshToken",
+            "in": "cookie",
+            "required": true,
+            "description": "Refresh token sent via a secure HttpOnly cookie",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token refreshed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/api/v1/auth/verify":{
+      "post":{
+        "summary": "OTP Verification",
+        "tags": ["Authentication"],
+         "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema":   {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string"},
+                  "code": { "type": "string"}
+                },
+                "required": ["userId", "code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account verified successful"
+          },
+          "401": {
+            "description": "Verification failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+     },
+    "/api/v1/auth/logout/:userId": {
+      "post": {
+        "summary": "User logout",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "refreshToken",
+            "in": "cookie",
+            "required": true,
+            "description": "Refresh token sent via a secure HttpOnly cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the user to log out",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

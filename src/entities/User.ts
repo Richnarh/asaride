@@ -1,28 +1,21 @@
-import { Entity, PrimaryColumn, Column, BaseEntity, BeforeInsert, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { ulid } from 'ulid';
+import { Entity, Column, OneToOne } from 'typeorm';
+import { BaseModel } from './BaseModel.js';
+import { Otp } from './Otp.js';
 
 @Entity({ name: 'users' })
-export class User extends BaseEntity {
-  @PrimaryColumn('varchar', { length: 26, nullable: false })
-  id?: string;
-
-  @Column({type: 'varchar'})
+export class User extends BaseModel {
+  @Column({ type: 'varchar', name: 'display_name', nullable: true })
   name?: string;
 
-  @Column({ unique: true, type: 'varchar' })
-  email?: string;
+  @Column({ unique: true, type: 'varchar', name: 'email_address', length:254 })
+  emailAddress?: string;
 
-  @Column({type: 'varchar'})
-  password?: string;
+  @Column({ unique: true, type: 'varchar', name: 'phone_number', length: 50})
+  phoneNumber?: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'date' })
-  createdAt: Date = new Date();
+  @Column({ type: 'varchar', name: 'image_path', nullable: true})
+  imagePath?: string;
 
-  @UpdateDateColumn({ name: 'lastupdated_at', type: 'date' })
-  lastUpdatedAt?: Date;
-
-  @BeforeInsert()
-  generateId() {
-    this.id = ulid();
-  }
+  @OneToOne(() => Otp, (otp) => otp.user)
+  otp?: Otp;
 }
