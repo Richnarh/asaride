@@ -12,7 +12,7 @@ import { AuthRequest } from '../models/model.js';
 import { NextFunction } from 'express-serve-static-core';
 import { logger } from '../utils/logger.js';
 import { User } from '../entities/User.js';
-import { Otp } from 'src/entities/Otp.js';
+import { Otp } from '../entities/Otp.js';
 
 export class AuthController {
   private authService:AuthService;

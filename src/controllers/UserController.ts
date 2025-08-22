@@ -73,7 +73,7 @@ export class UserController {
 
   async deleteUser(req: Request, res: Response, next:NextFunction) {
     try {
-      if(req.params.id){
+      if(!req.params.id){
         throw new AppError('UserId is required', HttpStatus.BAD_REQUEST);
       }
       const success = await this.userRepository.delete(req.params.id);
